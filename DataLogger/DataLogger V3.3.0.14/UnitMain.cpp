@@ -330,9 +330,11 @@ void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 
 	if ( m_pLogThread != NULL ) {
 		m_bLogThread = false;
-		GLogEvent->SetEvent();	//
-		Sleep(100); 	// Wait for while )  2025.02.19 200ms => 100ms
+		m_pLogThread->Terminate();
+		GLogEvent->SetEvent();	// Wake the thread if it is waiting.
+		m_pLogThread->WaitFor();	// Do not release shared resources until the thread has stopped.
 		delete m_pLogThread;
+		m_pLogThread = NULL;
 	}
 
 	// RQ-30d class resource destory
@@ -432,9 +434,11 @@ void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 
 		if ( m_pLogThread != NULL ) {
 			m_bLogThread = false;
-			GLogEvent->SetEvent();	//
-			Sleep(100); 	// Wait for while )  2025.02.19 200ms => 100ms
+			m_pLogThread->Terminate();
+			GLogEvent->SetEvent();	// Wake the thread if it is waiting.
+			m_pLogThread->WaitFor();	// Do not release shared resources until the thread has stopped.
 			delete m_pLogThread;
+			m_pLogThread = NULL;
 		}
 
 		// RQ-30d class resource destory
