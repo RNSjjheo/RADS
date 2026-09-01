@@ -240,6 +240,7 @@ public:
 	bool GoToSystemTray();
 	bool RestoreFromTray();
 	bool LocateRightButton();
+	bool IsComPortInstalled(UnicodeString sPort);
 
 public:		// User declarations
 	__fastcall TFormMain(TComponent* Owner);

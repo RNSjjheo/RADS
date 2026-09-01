@@ -1717,8 +1717,66 @@ void TFormMain::OnMessage(TMessage &Message)
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
+bool TFormMain::IsComPortInstalled(UnicodeString sPort)
+{
+	int iComNumber = ConvertComPort(sPort);
+	if ( iComNumber <= 0 ) return false;
+
+	UnicodeString sDeviceName = "COM" + IntToStr(iComNumber);
+	WCHAR szTargetPath[1024] = { 0, };
+	return QueryDosDeviceW(sDeviceName.c_str(), szTargetPath,
+						 sizeof(szTargetPath) / sizeof(szTargetPath[0])) != 0;
+}
+
+//---------------------------------------------------------------------------
 bool TFormMain::InitLogger()	// Init WaterLevel/HydroMeter1/2,...
 {
+	// Do not initialize a sensor whose configured COM device is not installed.
+	// This prevents the serial component from raising repeated exceptions on a
+	// PC that uses production settings but has no measurement devices attached.
+	if ( !theEnv.m_WaterType.IsEmpty() && theEnv.m_WaterType != NONE_STR &&
+		 !IsComPortInstalled(theEnv.m_WaterPort) ) {
+		LogMessage("WaterLevel disabled: COM device is not installed [" + theEnv.m_WaterPort + "]");
+		theEnv.m_WaterType = NONE_STR;
+	}
+
+	if ( !theEnv.m_HydroType1.IsEmpty() && theEnv.m_HydroType1 != NONE_STR &&
+		 !IsComPortInstalled(theEnv.m_HydroPort1) ) {
+		LogMessage("HydroMeter1 disabled: COM device is not installed [" + theEnv.m_HydroPort1 + "]");
+		theEnv.m_HydroType1 = NONE_STR;
+	}
+
+	if ( !theEnv.m_HydroType2.IsEmpty() && theEnv.m_HydroType2 != NONE_STR &&
+		 !IsComPortInstalled(theEnv.m_HydroPort2) ) {
+		LogMessage("HydroMeter2 disabled: COM device is not installed [" + theEnv.m_HydroPort2 + "]");
+		theEnv.m_HydroType2 = NONE_STR;
+	}
+
+	if ( !theEnv.m_HydroType3.IsEmpty() && theEnv.m_HydroType3 != NONE_STR &&
+		 !IsComPortInstalled(theEnv.m_HydroPort3) ) {
+		LogMessage("HydroMeter3 disabled: COM device is not installed [" + theEnv.m_HydroPort3 + "]");
+		theEnv.m_HydroType3 = NONE_STR;
+	}
+
+	if ( (theEnv.m_WaterType == LT400_STR || theEnv.m_bAtmosEnable) &&
+		 !IsComPortInstalled(theEnv.m_AtmosPort) ) {
+		LogMessage("Atmospheric sensor disabled: COM device is not installed [" + theEnv.m_AtmosPort + "]");
+		if ( theEnv.m_WaterType == LT400_STR ) theEnv.m_WaterType = NONE_STR;
+		else                                    theEnv.m_bAtmosEnable = false;
+	}
+
+	if ( !theEnv.m_HydroAirmarPort1.IsEmpty() && theEnv.m_HydroAirmarPort1 != NONE_STR &&
+		 !IsComPortInstalled(theEnv.m_HydroAirmarPort1) ) {
+		LogMessage("Airmar disabled: COM device is not installed [" + theEnv.m_HydroAirmarPort1 + "]");
+		theEnv.m_HydroAirmarPort1 = NONE_STR;
+	}
+
+	if ( theEnv.m_HydroUseSlavePort == ON_STR &&
+		 !IsComPortInstalled(theEnv.m_HydroSlavePort) ) {
+		LogMessage("RQ30D Slave disabled: COM device is not installed [" + theEnv.m_HydroSlavePort + "]");
+		theEnv.m_HydroUseSlavePort = OFF_STR;
+	}
+
 	// FlowStream Data Load
 	m_FlowIVM.PointCode = theEnv.m_PointCode;
 	m_FlowIVM.GetData();
