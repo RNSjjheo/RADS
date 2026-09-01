@@ -652,6 +652,10 @@ void __fastcall TFormMain::TimerTrayTimer(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormCreate(TObject *Sender)
 {
+	Memo->Font->Name = "Consolas";
+	Memo->Font->Height = -11;
+	Memo->ParentFont = false;
+
 //	m_CurrentDir = GetCurrentDir();
 //
 //	bResult = theEnv.LoadINI(m_CurrentDir + "\\DataLogger.ini");

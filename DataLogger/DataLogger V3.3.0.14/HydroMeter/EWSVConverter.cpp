@@ -334,6 +334,63 @@ bool TEWSVConverter::Send(AnsiString RecvMsg, int iLen)
 }
 
 //---------------------------------------------------------------------------
+// Get EWSV device type name
+UnicodeString TEWSVConverter::GetDeviceTypeName(BYTE DeviceType)
+{
+	switch ( DeviceType ) {
+		case 0: return L"NONE";
+		case 1: return L"RG";
+		case 2: return L"PAVOS";
+		case 3: return L"EWSV";
+		default: return L"UNKNOWN";
+	}
+}
+
+//---------------------------------------------------------------------------
+// EWSV measurement data log header
+void TEWSVConverter::LogDataHeader()
+{
+	UnicodeString sHeader;
+
+	sHeader.sprintf(
+		L"[EWSV] %7s %5s | %8s | %8s | %8s | %8s | %8s | %8s | %8s | %8s | %8s",
+		L"No/Tot", L"Type", L"W", L"V", L"SNR", L"Q",
+		L"LV", L"LQ", L"Opp", L"Volt", L"Angle"
+	);
+
+	LogMessage(sHeader);
+}
+
+//---------------------------------------------------------------------------
+// EWSV measurement data log
+void TEWSVConverter::LogData(int Index, int Total, const STEWSVData &EWSVData)
+{
+	UnicodeString sNo;
+	UnicodeString sDeviceType;
+	UnicodeString sLog;
+
+	sDeviceType = GetDeviceTypeName(EWSVData.DeviceType);
+	sNo.sprintf(L"%02d/%02d", Index, Total);
+
+	sLog.sprintf(
+		L"[EWSV] %7s %5s | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f",
+		sNo.c_str(),
+		sDeviceType.c_str(),
+		EWSVData.W,
+		EWSVData.V,
+		EWSVData.SNR,
+		EWSVData.Q,
+		EWSVData.LV,
+		EWSVData.LQ,
+		EWSVData.Opposite,
+		EWSVData.Volt,
+		EWSVData.Angle
+	);
+
+	LogMessage(sLog);
+}
+
+//---------------------------------------------------------------------------
 // Save
 bool TEWSVConverter::Save(UnicodeString MeasureDate, UnicodeString MeasureTime)
 {
@@ -352,6 +409,7 @@ bool TEWSVConverter::Save(UnicodeString MeasureDate, UnicodeString MeasureTime)
 	TRHydroMeterCellContainer HydroCellContainer;
 	TRHydroMeterCell *pHydroMeterCell = NULL;
 
+	LogDataHeader();
 	for ( int i = 0 ; i < Payload.Count ; i++ ) {  	// Detail Table : index start 1 => PAVOS,..
 
 		pHydroMeterCell = new TRHydroMeterCell(m_enHydroNo);
@@ -375,6 +433,7 @@ bool TEWSVConverter::Save(UnicodeString MeasureDate, UnicodeString MeasureTime)
 		pHydroMeterCell->Value28     = Payload.Data[i].DeviceType;
 
 		HydroCellContainer.Add(pHydroMeterCell);
+		LogData(i + 1, (int)Payload.Count, Payload.Data[i]);
 	}
 
 	bResult = HydroCellContainer.Save(MeasureDate, MeasureTime);

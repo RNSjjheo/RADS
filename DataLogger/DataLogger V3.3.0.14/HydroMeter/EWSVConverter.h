@@ -79,7 +79,9 @@ public:		// Method
 	void   SetBreak(bool bBreak);
 	bool   GetBreakStatus();
 	void   SendBreak(int iMiliSecond);	// Send <BREAK> to ComPort
-
+	UnicodeString GetDeviceTypeName(BYTE DeviceType);
+	void   LogDataHeader();
+	void   LogData(int Index, int Total, const STEWSVData &EWSVData);
 // Method
 	bool Send(BYTE *pBuffer, int iLen);
 	bool CaculateVelocity();
