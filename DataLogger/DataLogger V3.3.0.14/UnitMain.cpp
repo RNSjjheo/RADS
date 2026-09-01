@@ -721,7 +721,12 @@ void __fastcall TFormMain::TimerWaterTimer(TObject *Sender)
 			// 강제로 끝낸다. 별다른 작업 없음
 			// 그냥 다시 시작한다.
 		}
-		m_pWaterLevel->Start(m_MeasureDate, m_MeasureTime, false);	// 측정 중에 다시 시작함.
+		if ( !IsComPortOpen(WaterPort, "WaterLevel") ) {
+			TimerWater->Enabled = false;
+			::PostMessage(this->Handle, UM_MESSAGE, EN_LOGGER_STEP::enWaterLevelFinish, 0);
+			return;
+		}
+		m_pWaterLevel->Start(m_MeasureDate, m_MeasureTime, false);	// Retry during measurement.	// 측정 중에 다시 시작함.
 	}
 }
 
@@ -1302,7 +1307,7 @@ void TFormMain::OnMessage(TMessage &Message)
 				if ( m_enStep == enWaterLevelStart ) break;	// 이미 그 상태이면 Skip
 
 				m_enStep = enWaterLevelStart;
-				if ( m_pWaterLevel != NULL ) {
+				if ( m_pWaterLevel != NULL && IsComPortOpen(WaterPort, "WaterLevel") ) {
 					m_pWaterLevel->Start(m_MeasureDate, m_MeasureTime, true);	// first Start
 					if ( m_pWaterLevel->WaterKind == LT500_STR || m_pWaterLevel->WaterKind == LT400_STR ||
 						 m_pWaterLevel->WaterKind == AT200_STR || m_pWaterLevel->WaterKind == RNSWATER_STR) {
@@ -1349,6 +1354,10 @@ void TFormMain::OnMessage(TMessage &Message)
 					LogMessage("m_enStep == enHydroMeter1Start.. already Start Status..break");
 					break;	// 이미 그 상태이면 Skip
 				}
+				if ( m_pHydroMeter1 == NULL ) {
+					::PostMessage(this->Handle, UM_MESSAGE, EN_LOGGER_STEP::enHydroMeter1Finish, 0);
+					break;
+				}
 				if ( m_pHydroSetup1 != NULL ) {
 					LogMessage("m_pHydroSetup1 is not null.. HydroSetup Form Opened. break");
 					break;	// 설정 화면이 열려 있으면 Skip한다.
@@ -1359,20 +1368,20 @@ void TFormMain::OnMessage(TMessage &Message)
 				}
 
 				m_enStep = enHydroMeter1Start;
-				if ( m_pHydroMeter1 != NULL ) {
+				if ( IsComPortOpen(HydroPort1, "HydroMeter1") ) {
 					m_pHydroMeter1->Start(m_MeasureDate, m_MeasureTime); 	// 유속 장비별로 측정 시작
 					if (typeid(*m_pHydroMeter1) == typeid(TSL500K) || typeid(*m_pHydroMeter1) == typeid(TAG1500K)) {
 						// Read Timer Enable
 						TimerHydro1->Interval = 5 * 1000;	// 5 sec timer
 						TimerHydro1->Enabled  = true;
 					} else if ( typeid(*m_pHydroMeter1) == typeid(TRQ30) ) {	// RQ-30
-						if ( m_pAirmar != NULL ) {
+						if ( m_pAirmar != NULL && IsComPortOpen(AirmarPort, "Airmar") ) {
 							m_pAirmar->Start(m_MeasureDate, m_MeasureTime);
 						} else {
 							// nothing to do..
 						}
 					} else if ( typeid(*m_pHydroMeter1) == typeid(TRQ30D) ) {	// RQ-30d
-						if ( m_pAirmar != NULL ) {
+						if ( m_pAirmar != NULL && IsComPortOpen(AirmarPort, "Airmar") ) {
 							m_pAirmar->Start(m_MeasureDate, m_MeasureTime);
 						} else {
 							// nothing to do..
@@ -1413,11 +1422,15 @@ void TFormMain::OnMessage(TMessage &Message)
 		case enHydroMeter2Start :
 			{
 				if ( m_enStep == enHydroMeter2Start ) break;	// 이미 그 상태이면 Skip
+				if ( m_pHydroMeter2 == NULL ) {
+					::PostMessage(this->Handle, UM_MESSAGE, EN_LOGGER_STEP::enHydroMeter2Finish, 0);
+					break;
+				}
 				if ( m_pHydroSetup2 != NULL ) break;	// 설정 화면이 열려 있으면 Skip한다.
 				if ( m_pHydroMeter2->GetBreakStatus()) break;
 
 				m_enStep = enHydroMeter2Start;
-				if ( m_pHydroMeter2 != NULL ) {
+				if ( IsComPortOpen(HydroPort2, "HydroMeter2") ) {
 					m_pHydroMeter2->Start(m_MeasureDate, m_MeasureTime);
 					if (typeid(*m_pHydroMeter2) == typeid(TSL500K) || typeid(*m_pHydroMeter2) == typeid(TAG1500K)) {
 						// Read Timer Enable
@@ -1460,11 +1473,15 @@ void TFormMain::OnMessage(TMessage &Message)
 		case enHydroMeter3Start :
 			{
 				if ( m_enStep == enHydroMeter3Start ) break;	// 이미 그 상태이면 Skip
+				if ( m_pHydroMeter3 == NULL ) {
+					::PostMessage(this->Handle, UM_MESSAGE, EN_LOGGER_STEP::enHydroMeter3Finish, 0);
+					break;
+				}
 				if ( m_pHydroSetup3 != NULL ) break;	// 설정 화면이 열려 있으면 Skip한다.
 				if ( m_pHydroMeter3->GetBreakStatus()) break;
 
 				m_enStep = enHydroMeter3Start;
-				if ( m_pHydroMeter3 != NULL ) {
+				if ( IsComPortOpen(HydroPort3, "HydroMeter3") ) {
 					m_pHydroMeter3->Start(m_MeasureDate, m_MeasureTime);
 					if (typeid(*m_pHydroMeter3) == typeid(TSL500K) || typeid(*m_pHydroMeter3) == typeid(TAG1500K)) {
 						// Read Timer Enable
@@ -1726,6 +1743,28 @@ bool TFormMain::IsComPortInstalled(UnicodeString sPort)
 	WCHAR szTargetPath[1024] = { 0, };
 	return QueryDosDeviceW(sDeviceName.c_str(), szTargetPath,
 						 sizeof(szTargetPath) / sizeof(szTargetPath[0])) != 0;
+}
+
+//---------------------------------------------------------------------------
+bool TFormMain::IsComPortOpen(TApdComPort *pPort, UnicodeString sName)
+{
+	if ( pPort == NULL ) {
+		LogMessage(sName + " measurement skipped: COM component is not assigned");
+		return false;
+	}
+
+	try {
+		if ( pPort->Open ) return true;
+	} catch ( Exception &e ) {
+		LogMessage(sName + " COM status check failed: " + e.Message);
+		return false;
+	} catch (...) {
+		LogMessage(sName + " COM status check failed: unknown C++ exception");
+		return false;
+	}
+
+	LogMessage(sName + " measurement skipped: COM port is closed");
+	return false;
 }
 
 //---------------------------------------------------------------------------

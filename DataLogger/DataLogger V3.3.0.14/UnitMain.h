@@ -241,6 +241,7 @@ public:
 	bool RestoreFromTray();
 	bool LocateRightButton();
 	bool IsComPortInstalled(UnicodeString sPort);
+	bool IsComPortOpen(TApdComPort *pPort, UnicodeString sName);
 
 public:		// User declarations
 	__fastcall TFormMain(TComponent* Owner);
