@@ -1,0 +1,9 @@
+**/Win32/*
+**/DataLoggerPrecompileRelease.#*
+**/DataLoggerPrecompileRelease
+**/DataLoggerPrecompileDebug.#*
+**/DataLoggerPrecompileDebug
+**/DataLogger.res
+**/__history/*
+*.cbproj.local
+.vs/
