@@ -353,9 +353,8 @@ void TEWSVConverter::LogDataHeader()
 	UnicodeString sHeader;
 
 	sHeader.sprintf(
-		L"[EWSV] %7s %5s | %8s | %8s | %8s | %8s | %8s | %8s | %8s | %8s | %8s",
-		L"No/Tot", L"Type", L"W", L"V", L"SNR", L"Q",
-		L"LV", L"LQ", L"Opp", L"Volt", L"Angle"
+		L"[ESV ] %7s %5s | %8s | %8s | %8s | %8s | %8s | %8s",
+		L"No/Tot", L"Type", L"V", L"SNR", L"LV", L"Opp", L"Volt", L"Tilt"
 	);
 
 	LogMessage(sHeader);
@@ -373,15 +372,12 @@ void TEWSVConverter::LogData(int Index, int Total, const STEWSVData &EWSVData)
 	sNo.sprintf(L"%02d/%02d", Index, Total);
 
 	sLog.sprintf(
-		L"[EWSV] %7s %5s | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f",
+		L"[ESV ] %7s %5s | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f | %8.3f",
 		sNo.c_str(),
 		sDeviceType.c_str(),
-		EWSVData.W,
 		EWSVData.V,
 		EWSVData.SNR,
-		EWSVData.Q,
 		EWSVData.LV,
-		EWSVData.LQ,
 		EWSVData.Opposite,
 		EWSVData.Volt,
 		EWSVData.Angle
