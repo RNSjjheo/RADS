@@ -24,6 +24,8 @@ class TLogThread : public TThread
 public:
 	TLog m_Log; 	// Log Write class
 private:
+	UnicodeString m_sUILogMessage;
+	void __fastcall UpdateLogMemo();
 protected:
 	void __fastcall Execute();
 	void LogWrite(STLogMessage *pLogMessage);

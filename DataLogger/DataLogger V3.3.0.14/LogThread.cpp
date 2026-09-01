@@ -78,10 +78,18 @@ void TLogThread::LogWrite(STLogMessage *pLogMessage)
 		m_Log.LogMessage(sLogMsg);
 	}
 
-	if ( !Application->Terminated ) {	// 아직 종료되지 않았으면 .
-
-		if ( FormMain->Memo->Lines->Count > 100 ) FormMain->Memo->Lines->Clear();
-
-		FormMain->Memo->Lines->Insert(0, sLogMsg);
-	}
+	// VCL controls must only be accessed by the main UI thread.
+	m_sUILogMessage = sLogMsg;
+	Synchronize(UpdateLogMemo);
 }
+//---------------------------------------------------------------------------
+
+void __fastcall TLogThread::UpdateLogMemo()
+{
+	if ( Application->Terminated || FormMain == NULL ) return;
+
+	if ( FormMain->Memo->Lines->Count > 100 ) FormMain->Memo->Lines->Clear();
+
+	FormMain->Memo->Lines->Insert(0, m_sUILogMessage);
+}
+//---------------------------------------------------------------------------
