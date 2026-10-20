@@ -350,7 +350,7 @@ AnsiString TEsvData::GetEsvDeviceStr()
 		}
 		if ( pData == NULL ) continue;
 
-		sEsvDeviceStr += sFormat.sprintf("%10d,%10.3f,%10.3f,%10.2f,%10.2f,%10.2f,%10d,%10d,",
+		sEsvDeviceStr += sFormat.sprintf("%10d,%10.3f,%10.3f,%10.2f,%10.2f,%10.2f,%10d,%10.2d,",
 							//pData->Address,
 							(DeviceType == 3) ? pData->Address : i+1,	// 좌안부터 실제 Address가 아닌 1,2,3,... 형태로 표출
 							V_BoundCheck(pData->LV),

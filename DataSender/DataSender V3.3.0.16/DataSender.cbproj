@@ -130,8 +130,8 @@
         <TASM_Debugging>None</TASM_Debugging>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-        <VerInfo_Build>15</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=(C)RNSEA;FileDescription=The DataSender of HydroMeter and WaterLevel data.;FileVersion=3.3.0.15;InternalName=DataSender;LegalCopyright=(C)RNSEA, All rights reserved.;LegalTrademarks=;OriginalFilename=;ProductName=DataSender;ProductVersion=3.3.0.15;Comments=DataSender send HydroMeter and WaterLevel data</VerInfo_Keys>
+        <VerInfo_Build>16</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=(C)RNSEA;FileDescription=The DataSender of HydroMeter and WaterLevel data.;FileVersion=3.3.0.16;InternalName=DataSender;LegalCopyright=(C)RNSEA, All rights reserved.;LegalTrademarks=;OriginalFilename=;ProductName=DataSender;ProductVersion=3.3.0.16;Comments=DataSender send HydroMeter and WaterLevel data</VerInfo_Keys>
         <IncludePath>C:\Program Files (x86)\SecureBlackbox.VCL\Packages\CBuilderXE5;$(IncludePath)</IncludePath>
         <ILINK_LibraryPath>C:\Program Files (x86)\SecureBlackbox.VCL\Packages\CBuilderXE5\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <BCC_AllCodeguardOptions>false</BCC_AllCodeguardOptions>
