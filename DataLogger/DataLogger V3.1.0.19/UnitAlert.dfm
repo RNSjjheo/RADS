@@ -1,0 +1,42 @@
+object FormAlert: TFormAlert
+  Left = 0
+  Top = 0
+  BorderIcons = []
+  BorderStyle = bsSingle
+  Caption = #50508#47548
+  ClientHeight = 52
+  ClientWidth = 294
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Panel: TPanel
+    Left = 0
+    Top = 0
+    Width = 294
+    Height = 52
+    Align = alClient
+    BevelOuter = bvNone
+    Caption = 'Message'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 0
+    ExplicitWidth = 300
+    ExplicitHeight = 61
+  end
+  object Timer: TTimer
+    Enabled = False
+    Left = 32
+    Top = 8
+  end
+end
