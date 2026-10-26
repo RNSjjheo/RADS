@@ -1163,8 +1163,8 @@ char TRHydroMeter::GetWaterAdvText(AnsiString &sResult)	// 유속계에서 수위 데이�
 		sDeci_WL += (DataSet()->Eof && DataSet()->Bof) ? "2" : (fWaterLevel < frmMain->DBEnvInfo.fWaterLevel_Min || fWaterLevel > frmMain->DBEnvInfo.fWaterLevel_Max) ? "1" : "0"; //수위
 		sDeci_WL += "2";	// 염도 결측
 		sResult += sFormat.sprintf("%10s",   sDeci_WL   ) + ","; // Deci_WL,    -> 수위계 판단(수위, 염도)
-		sResult += sFormat.sprintf("%10.2f", fWaterDepth) + ","; // WaterDepth, -> 수심
-		sResult += sFormat.sprintf("%10.3f", fWaterLevel) + ","; // WaterLevel, -> 수위(dept + offset)
+		sResult += sFormat.sprintf("%10.3f", fWaterDepth) + ","; // WaterDepth, -> 수심
+		sResult += sFormat.sprintf("%10.2f", fWaterLevel) + ","; // WaterLevel, -> 수위(dept + offset)
 		sResult += sFormat.sprintf("%10.3f", fOffset    ) + ","; // WL_Offset,  -> 오프셋
 		sResult += sFormat.sprintf("%10.2f", fSalinity  ) + ","; // Salinity,   -> 염도
 
@@ -1179,8 +1179,8 @@ char TRHydroMeter::GetWaterAdvText(AnsiString &sResult)	// 유속계에서 수위 데이�
 		sDeci_WL += "2";	// 결측
 		sDeci_WL += "2";	// 결측
 		sResult += sFormat.sprintf("%10s",   sDeci_WL   ) + ","; // Deci_WL,    -> 수위계 판단(수위, 염도)
-		sResult += sFormat.sprintf("%10.2f", fWaterDepth) + ","; // WaterDepth, -> 수심
-		sResult += sFormat.sprintf("%10.3f", fWaterLevel) + ","; // WaterLevel, -> 수위(dept + offset)
+		sResult += sFormat.sprintf("%10.3f", fWaterDepth) + ","; // WaterDepth, -> 수심
+		sResult += sFormat.sprintf("%10.2f", fWaterLevel) + ","; // WaterLevel, -> 수위(dept + offset)
 		sResult += sFormat.sprintf("%10.3f", fOffset    ) + ","; // WL_Offset,  -> 오프셋
 		sResult += sFormat.sprintf("%10.2f", fSalinity  ) + ","; // Salinity,   -> 염도
 	}
