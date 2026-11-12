@@ -64,6 +64,12 @@ public:		// Method
 	int  CheckFrame(BYTE *pBuffer, int Length);
 
 	void GetData(double &W, double &T, double &D,  double &P);
+private:
+    void LogReceivedFrame(const BYTE *pBuffer, int iLen);
+    void LogWaterData(BYTE Type, const STRnsWater &Data);
+    void AddWaterSample(const STRnsWater &Data);
+    bool ValidateFrameLength(const BYTE *pBuffer, int iLen);
+    bool CheckMK21ErrorValue(const STRnsWater &Data);
 };
 
 

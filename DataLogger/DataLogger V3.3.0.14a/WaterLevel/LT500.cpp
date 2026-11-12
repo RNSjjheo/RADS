@@ -685,8 +685,8 @@ bool TLT500::CalAvgMinMaxWaterLevel()
 			Depth       += pData->Depth;
 			iValidCount++;
 
-			if ( MinWaterLevel < pData->Depth ) MinWaterLevel = pData->Depth;
-			if ( MaxWaterLevel > pData->Depth ) MaxWaterLevel = pData->Depth;
+			if ( pData->Depth < MinWaterLevel ) MinWaterLevel = pData->Depth;
+			if ( pData->Depth > MaxWaterLevel ) MaxWaterLevel = pData->Depth;
 		}
 
 		//if ( m_pList->Count > 0 ) {

@@ -233,7 +233,8 @@ bool TRnsWater::Decode(AnsiString RecvMsg, int iLen)
 
 //---------------------------------------------------------------------------
 // Decode
-bool TRnsWater::Decode(BYTE *pBuffer, int iLen)
+//---------------------------------------------------------------------------
+void TRnsWater::LogReceivedFrame(const BYTE *pBuffer, int iLen)
 {
 	UnicodeString Hex;
 	if ( pBuffer != NULL ) {
@@ -243,6 +244,22 @@ bool TRnsWater::Decode(BYTE *pBuffer, int iLen)
 		}
 	}
 	LogMessage("[RnsWater][RX] Len=" + IntToStr(iLen) + " HEX=" + Hex);
+}
+
+void TRnsWater::LogWaterData(BYTE Type, const STRnsWater &Data)
+{
+	UnicodeString DataLog;
+	DataLog.sprintf(L"[RnsWater][DATA][0x%02X][DEV %u] D=%.6f, T=%.6f, P=%.6f, S=%.6f, R1=%.6f, R2=%.6f, R3=%.6f, R4=%.6f",
+		(unsigned int)Type, (unsigned int)Data.Type, Data.Depth, Data.Temperature,
+		Data.Pressure, Data.Salinity, Data.Reserved01, Data.Reserved02,
+		Data.Reserved03, Data.Reserved04);
+	LogMessage(DataLog);
+}
+
+bool TRnsWater::ValidateFrameLength(const BYTE *pBuffer, int iLen)
+{
+	LogReceivedFrame(pBuffer, iLen);
+
 	if ( pBuffer == NULL || iLen < 5 ) {
 		LogMessage("[RnsWater][INVALID] Reason=FrameLength");
 		return false;
@@ -251,6 +268,74 @@ bool TRnsWater::Decode(BYTE *pBuffer, int iLen)
 		LogMessage("[RnsWater][INVALID] Reason=FrameLength PayloadLen=" + IntToStr((int)pBuffer[2]));
 		return false;
 	}
+
+	return true;
+}
+
+bool TRnsWater::CheckMK21ErrorValue(const STRnsWater &Data)
+{
+	UnicodeString Reason;
+
+	if ( Data.Depth == -99.0f ) {
+		Reason = "PowerOnOrReboot";
+	} else if ( Data.Depth == -98.0f ) {
+		Reason = "Timeout2s";
+	} else if ( Data.Depth == -97.0f ) {
+		Reason = "ParseFailed";
+	} else {
+		return false;
+	}
+
+	UnicodeString ErrorLog;
+	ErrorLog.sprintf(L"[RnsWater][ERROR][0x%02X][DEV %u] D=%.6f Reason=%s ExcludedFromStatistics=1",
+		(unsigned int)RnsWaterRes, (unsigned int)Data.Type, Data.Depth, Reason.c_str());
+	LogMessage(ErrorLog);
+
+	return true;
+}
+
+void TRnsWater::AddWaterSample(const STRnsWater &Data)
+{
+	switch ( Data.Type ){
+		case 0x00:
+			LogMessage("RnsWater no water device..");
+			return;
+		case 0x01:
+		case 0x02:
+		case 0x03:
+		case 0x04:
+		case 0x05:
+		case 0x06:
+		case 0x07:
+			break;
+		case 0x08: // MK21
+			if(CheckMK21ErrorValue(Data)) return;
+			break;
+		default:
+			LogMessage("RnsWater unknown device type..");
+			return;
+    }
+
+    STRnsWater *pRnsWater = new STRnsWater();
+    *pRnsWater = Data;
+
+    m_pList->Add(pRnsWater);
+
+	UnicodeString Message;
+	Message.sprintf(
+		L"RnsWater waterlevel added %.2f(Raw=%.2f, Offset=%.2f)",
+		Data.Depth + theEnv.m_WaterOffset,
+		Data.Depth,
+		theEnv.m_WaterOffset
+	);
+
+	LogMessage(Message);
+}
+
+bool TRnsWater::Decode(BYTE *pBuffer, int iLen)
+{
+	if (!ValidateFrameLength(pBuffer, iLen) ) return false;
+
 	int iResult = CheckFrame(pBuffer, iLen);
 	
 	if ( iResult == FRAME_OK ) {
@@ -286,30 +371,10 @@ bool TRnsWater::Decode(BYTE *pBuffer, int iLen)
 		}
 		STRnsWater Data;
 		memcpy(&Data, pBuffer+3, sizeof(Data));
-		UnicodeString DataLog;
-		DataLog.sprintf(L"[RnsWater][DATA][0x%02X][DEV %u] D=%.6f, T=%.6f, P=%.6f, S=%.6f, R1=%.6f, R2=%.6f, R3=%.6f, R4=%.6f",
-			(unsigned int)Type, (unsigned int)Data.Type, Data.Depth, Data.Temperature,
-			Data.Pressure, Data.Salinity, Data.Reserved01, Data.Reserved02,
-			Data.Reserved03, Data.Reserved04);
-		LogMessage(DataLog);
-		if ( DeviceType == 0x00 ) {	// Device Type => 0x00 => DEVICE NONE
-			LogMessage("RnsWater no water device..");
-		} else if ( DeviceType == 0x01 || DeviceType == 0x02 || DeviceType == 0x03 ||
-					DeviceType == 0x04 || DeviceType == 0x05 || DeviceType == 0x06 ||
-					DeviceType == 0x07 || DeviceType == 0x08 )  {	// 1: VegaPuls(4~20mA), 2:VegaPuls(485Converter), 3: VegaPuls(Rs-485)
-	
-			STRnsWater *pRnsWater = new STRnsWater();
-			memcpy(pRnsWater, pBuffer+3, PayloadLength);	// Payload Copy
-			
-			m_pList->Add(pRnsWater);	// Add list 
-			
-			LogMessage("RnsWater waterlevel added.." + FloatToStrF(pRnsWater->Depth + theEnv.m_WaterOffset, ffFixed, 5, 2 ));
-		} else {
-			// Unknown device type
-			LogMessage("RnsWater unknown device type..");
-		}
-	} else if ( Type == AirmarDataRes ) {	// Airmar Data 요구에 대한 응답 => Term: 1분 간격으로 요청함.
+		LogWaterData(Type, Data);
+		AddWaterSample(Data);
 
+	} else if ( Type == AirmarDataRes ) {	// Airmar Data 요구에 대한 응답 => Term: 1분 간격으로 요청함.
 		if ( PayloadLength != sizeof(STAirmarData) ) {
 			LogMessage("[RnsWater][INVALID] Reason=AirmarPayloadLength Expected=" +
 				IntToStr((int)sizeof(STAirmarData)) + " Actual=" + IntToStr(PayloadLength));
@@ -329,7 +394,6 @@ bool TRnsWater::Decode(BYTE *pBuffer, int iLen)
 	} else {
 		LogMessage("RnsWater unknown message type..");
 	}
-
 
 	m_TimeStamp = Now();	// 데이터 수신 받은 시간 갱신
 	
@@ -719,8 +783,8 @@ bool TRnsWater::CaculateWaterLevel()
 			Salinity    += pData->Salinity;
 			iValidCount++;
 
-			if ( MinWaterLevel < pData->Depth ) MinWaterLevel = pData->Depth;
-			if ( MaxWaterLevel > pData->Depth ) MaxWaterLevel = pData->Depth;
+			if ( pData->Depth < MinWaterLevel ) MinWaterLevel = pData->Depth;
+			if ( pData->Depth > MaxWaterLevel ) MaxWaterLevel = pData->Depth;
 		} // end of for
 
 		if ( iValidCount > 0 ) {

@@ -747,8 +747,8 @@ bool TAT200::CalAvgMinMaxWaterLevel()
 			//WaterDensity         += pData->WaterDensity;
 			iValidCount++;
 
-			if ( MinWaterLevel < pData->Depth ) MinWaterLevel = pData->Depth;
-			if ( MaxWaterLevel > pData->Depth ) MaxWaterLevel = pData->Depth;
+			if ( pData->Depth < MinWaterLevel ) MinWaterLevel = pData->Depth;
+			if ( pData->Depth > MaxWaterLevel ) MaxWaterLevel = pData->Depth;
 		}
 
 		if ( iValidCount > 0  ) {
