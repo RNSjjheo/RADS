@@ -394,9 +394,9 @@ object FormMain: TFormMain
     Transparent = True
   end
   object lbVersion: TLabel
-    Left = 296
+    Left = 288
     Top = 96
-    Width = 44
+    Width = 52
     Height = 13
     Alignment = taRightJustify
     AutoSize = False

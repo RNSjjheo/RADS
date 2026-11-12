@@ -234,6 +234,11 @@ bool TRnsWater::Decode(AnsiString RecvMsg, int iLen)
 //---------------------------------------------------------------------------
 // Decode
 //---------------------------------------------------------------------------
+void TRnsWater::LogFileMessage(UnicodeString Message)
+{
+	FormMain->LogMessage(Message, true, false, false);
+}
+
 void TRnsWater::LogReceivedFrame(const BYTE *pBuffer, int iLen)
 {
 	UnicodeString Hex;
@@ -243,7 +248,7 @@ void TRnsWater::LogReceivedFrame(const BYTE *pBuffer, int iLen)
 			Hex += IntToHex((int)pBuffer[i], 2);
 		}
 	}
-	LogMessage("[RnsWater][RX] Len=" + IntToStr(iLen) + " HEX=" + Hex);
+	LogFileMessage("[RnsWater][RX] Len=" + IntToStr(iLen) + " HEX=" + Hex);
 }
 
 void TRnsWater::LogWaterData(BYTE Type, const STRnsWater &Data)
@@ -253,7 +258,7 @@ void TRnsWater::LogWaterData(BYTE Type, const STRnsWater &Data)
 		(unsigned int)Type, (unsigned int)Data.Type, Data.Depth, Data.Temperature,
 		Data.Pressure, Data.Salinity, Data.Reserved01, Data.Reserved02,
 		Data.Reserved03, Data.Reserved04);
-	LogMessage(DataLog);
+	LogFileMessage(DataLog);
 }
 
 bool TRnsWater::ValidateFrameLength(const BYTE *pBuffer, int iLen)
@@ -261,11 +266,11 @@ bool TRnsWater::ValidateFrameLength(const BYTE *pBuffer, int iLen)
 	LogReceivedFrame(pBuffer, iLen);
 
 	if ( pBuffer == NULL || iLen < 5 ) {
-		LogMessage("[RnsWater][INVALID] Reason=FrameLength");
+		LogFileMessage("[RnsWater][INVALID] Reason=FrameLength");
 		return false;
 	}
 	if ( iLen != (int)pBuffer[2] + 5 ) {
-		LogMessage("[RnsWater][INVALID] Reason=FrameLength PayloadLen=" + IntToStr((int)pBuffer[2]));
+		LogFileMessage("[RnsWater][INVALID] Reason=FrameLength PayloadLen=" + IntToStr((int)pBuffer[2]));
 		return false;
 	}
 
@@ -289,7 +294,7 @@ bool TRnsWater::CheckMK21ErrorValue(const STRnsWater &Data)
 	UnicodeString ErrorLog;
 	ErrorLog.sprintf(L"[RnsWater][ERROR][0x%02X][DEV %u] D=%.6f Reason=%s ExcludedFromStatistics=1",
 		(unsigned int)RnsWaterRes, (unsigned int)Data.Type, Data.Depth, Reason.c_str());
-	LogMessage(ErrorLog);
+	LogFileMessage(ErrorLog);
 
 	return true;
 }
@@ -365,7 +370,7 @@ bool TRnsWater::Decode(BYTE *pBuffer, int iLen)
 	
 	if ( Type == RnsWaterRes ) {	// 0x11 RnsWaterRes
 		if ( PayloadLength != sizeof(STRnsWater) ) {
-			LogMessage("[RnsWater][INVALID] Reason=PayloadLength Expected=" +
+			LogFileMessage("[RnsWater][INVALID] Reason=PayloadLength Expected=" +
 				IntToStr((int)sizeof(STRnsWater)) + " Actual=" + IntToStr(PayloadLength));
 			return false;
 		}
@@ -376,7 +381,7 @@ bool TRnsWater::Decode(BYTE *pBuffer, int iLen)
 
 	} else if ( Type == AirmarDataRes ) {	// Airmar Data 요구에 대한 응답 => Term: 1분 간격으로 요청함.
 		if ( PayloadLength != sizeof(STAirmarData) ) {
-			LogMessage("[RnsWater][INVALID] Reason=AirmarPayloadLength Expected=" +
+			LogFileMessage("[RnsWater][INVALID] Reason=AirmarPayloadLength Expected=" +
 				IntToStr((int)sizeof(STAirmarData)) + " Actual=" + IntToStr(PayloadLength));
 			return false;
 		}

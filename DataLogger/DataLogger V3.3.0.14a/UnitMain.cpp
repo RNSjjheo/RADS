@@ -1081,7 +1081,7 @@ void TFormMain::SetUIExtend(bool bEnlarge)
 }
 
 //---------------------------------------------------------------------------
-void TFormMain::LogMessage(UnicodeString sMsg, bool bFile, bool bDB)
+void TFormMain::LogMessage(UnicodeString sMsg, bool bFile, bool bDB, bool bUI)
 {
 	// File, UI Log
 	STLogMessage *pLogMessage = new STLogMessage();
@@ -1089,6 +1089,7 @@ void TFormMain::LogMessage(UnicodeString sMsg, bool bFile, bool bDB)
 	pLogMessage->LogTime = Now();
 	pLogMessage->LogMessage = Trim(sMsg);
 	pLogMessage->bFile = bFile;
+	pLogMessage->bUI = bUI;
 
 	pGLogSection->Enter();
 	GLogQueue->Push(pLogMessage);

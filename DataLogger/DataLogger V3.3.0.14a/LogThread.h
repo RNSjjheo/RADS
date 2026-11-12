@@ -15,6 +15,7 @@ struct STLogMessage
 	TDateTime     LogTime;
 	UnicodeString LogMessage;
 	bool          bFile;
+	bool          bUI;
 };
 
 

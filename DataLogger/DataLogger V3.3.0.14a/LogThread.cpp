@@ -78,6 +78,8 @@ void TLogThread::LogWrite(STLogMessage *pLogMessage)
 		m_Log.LogMessage(sLogMsg);
 	}
 
+	if ( !pLogMessage->bUI ) return;
+
 	// VCL controls must only be accessed by the main UI thread.
 	m_sUILogMessage = sLogMsg;
 	Synchronize(UpdateLogMemo);

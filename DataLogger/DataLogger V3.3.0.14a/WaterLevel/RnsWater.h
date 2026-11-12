@@ -65,6 +65,7 @@ public:		// Method
 
 	void GetData(double &W, double &T, double &D,  double &P);
 private:
+    void LogFileMessage(UnicodeString Message);
     void LogReceivedFrame(const BYTE *pBuffer, int iLen);
     void LogWaterData(BYTE Type, const STRnsWater &Data);
     void AddWaterSample(const STRnsWater &Data);

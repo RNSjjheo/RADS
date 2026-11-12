@@ -286,7 +286,7 @@ public:		// User declarations
 
 	void MemoryGarbageCollection();		// Check Garbage Collection
 
-	void LogMessage(UnicodeString sMsg, bool bFile=true, bool bDB=false);
+	void LogMessage(UnicodeString sMsg, bool bFile=true, bool bDB=false, bool bUI=true);
 
 	void OnMessage(TMessage &Message);	// Main Message process
 
